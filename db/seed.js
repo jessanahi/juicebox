@@ -1,4 +1,4 @@
-const { client, getAllUsers } = require('./index');
+const { client, getAllUsers, createUser } = require('./index');
 
 async function dropTables() {
   try {
@@ -47,15 +47,15 @@ async function rebuildDB() {
 
 async function testDB() {
   try {
-    client.connect();
+    console.log('Starting to test database...');
 
-    const { rows } = await client.query(`SELECT * FROM users;`);
+    const users = await getAllUsers();
+    console.log('getAllUsers:', users);
 
-    console.log(rows);
+    console.log('Finished database tests!');
   } catch (error) {
-    console.error(error);
-  } finally {
-    client.end();
+    console.error('Error testing database.');
+    throw error;
   }
 }
 
