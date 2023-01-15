@@ -1,4 +1,4 @@
-const { client, getAllUsers, createUser } = require('./index');
+const { client, getAllUsers, createUser, updateUser } = require('./index');
 
 async function dropTables() {
   try {
@@ -26,7 +26,7 @@ async function createTables() {
         password varchar(255) NOT NULL,
         name VARCHAR(255) NOT NULL,
         location VARCHAR(255) NOT NULL,
-        actice BOOLEAN DEFAULT true
+        active BOOLEAN DEFAULT true
         );
       `);
 
@@ -72,6 +72,12 @@ async function testDB() {
 
     const users = await getAllUsers();
     console.log('getAllUsers:', users);
+
+    const updateUserResult = await updateUser(users[0].id, {
+      name: 'Lisa Simpson',
+      location: 'Springfield'
+    });
+    console.log('Result:', updateUserResult);
 
     console.log('Finished database tests!');
   } catch (error) {
