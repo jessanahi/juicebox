@@ -49,9 +49,51 @@ async function updateUser(id, fields = {}) {
     }
 }
 
+async function createPost({ 
+    authorId, 
+    title,
+    content
+ }) {
+    try {
+        const { rows: [ post ]} = await client.query(`
+            INSERT INTO post (authorId, title, content)
+            VALUES ($1, $2, $3)
+            RETURNING *;
+        `, [authorId, title, content]);
+
+        return post;
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function updatePost(id, fields = {}) {
+    const setString = Object.keys(fields).map(
+        (key, index) => `"${ key }"=$${ index + 1 }`
+    ).join(', ');
+
+    if (setString.length === 0) {
+        return;
+    }
+    try {
+        const { rows: [ post ] } = await client.query(`
+        UPDATE post
+        SET ${ setString }
+        WHERE id=${ id }
+        RETURNING *;
+        `, Object.values(fields));
+
+        return post;
+    } catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
     client,
     getAllUsers,
     createUser,
-    updateUser
+    updateUser,
+    createPost,
+    updatePost
 }

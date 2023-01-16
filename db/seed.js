@@ -1,10 +1,31 @@
 const { client, getAllUsers, createUser, updateUser } = require('./index');
 
+async function createPostTable() {
+  try {
+    console.log('Trying to create another table...');
+
+    await client.query(`
+      CREATE TABLE posts (
+        id SERIAL PRIMARY KEY,
+        "authorId" INTEGER REFERENCES users(id) NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        active BOOLEAN DEFAULT true
+        );
+      `);
+    console.log('Finished building new table!');
+  } catch (error) {
+    console.error('Error building table.');
+    throw error;
+  }
+}
+
 async function dropTables() {
   try {
     console.log('Starting to drop tables...');
 
     await client.query(`
+      DROP TABLE IF EXISTS posts;
       DROP TABLE IF EXISTS users;
       `);
 
@@ -41,14 +62,29 @@ async function createInitialUsers() {
   try {
     console.log('Starting to create users...');
 
-    await createUser({ username: 'albert', password: 'bertie99', name: 'Albert', location: 'LA' });
+    await createUser({
+      username: 'albert',
+      password: 'bertie99',
+      name: 'Albert',
+      location: 'LA',
+    });
 
-    await createUser({ username: 'sandra', password: '2sandy4me', name: 'Sandra', location: 'OH' });
+    await createUser({
+      username: 'sandra',
+      password: '2sandy4me',
+      name: 'Sandra',
+      location: 'OH',
+    });
 
-    await createUser({ username: 'glamgal', password: 'soglam', name: 'Lana', location: 'NY' });
+    await createUser({
+      username: 'glamgal',
+      password: 'soglam',
+      name: 'Lana',
+      location: 'NY',
+    });
 
     console.log('Finished creating users!');
-  } catch(error) {
+  } catch (error) {
     console.error('Error creating users.');
     throw error;
   }
@@ -61,6 +97,7 @@ async function rebuildDB() {
     await dropTables();
     await createTables();
     await createInitialUsers();
+    await createPostTable();
   } catch (error) {
     throw error;
   }
@@ -75,7 +112,7 @@ async function testDB() {
 
     const updateUserResult = await updateUser(users[0].id, {
       name: 'Lisa Simpson',
-      location: 'Springfield'
+      location: 'Springfield',
     });
     console.log('Result:', updateUserResult);
 
