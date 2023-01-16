@@ -56,17 +56,17 @@ async function updateUser(id, fields = {}) {
   }
 }
 
-async function createPost({ authorId, title, content }) {
+async function createPost({ authorId, title, content, tags }) {
   try {
     const {
       rows: [post],
     } = await client.query(
       `
-            INSERT INTO posts("authorId", title, content)
+            INSERT INTO posts("authorId", title, content, tags)
             VALUES ($1, $2, $3)
             RETURNING *;
         `,
-      [authorId, title, content]
+      [authorId, title, content, tags]
     );
 
     return post;
@@ -100,6 +100,17 @@ async function updatePost(id, fields = {}) {
   } catch (error) {
     throw error;
   }
+}
+
+async function createTags(tagList) {
+  if (tagList.length === 0) {
+    return;
+  }
+
+  const insertValues = tagList.map((key, index) => `"${key}"=$${index + 1}`)
+  .join(', ');
+
+ ///////////////////////////////
 }
 
 async function getAllPosts() {
