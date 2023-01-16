@@ -14,6 +14,8 @@ async function dropTables() {
     console.log('Starting to drop tables...');
 
     await client.query(`
+      DROP TABLE IF EXISTS post_tags;
+      DROP TABLE IF EXISTS tags;
       DROP TABLE IF EXISTS posts;
       DROP TABLE IF EXISTS users;
       `);
@@ -27,29 +29,18 @@ async function dropTables() {
 
 async function createTables() {
   try {
-    console.log('Starting to build tables...');
+    console.log('Starting to create tables...');
 
     await client.query(`
       CREATE TABLE users (
         id SERIAL PRIMARY KEY,
-        username varchar(255) UNIQUE NOT NULL,
-        password varchar(255) NOT NULL,
+        username VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
         name VARCHAR(255) NOT NULL,
         location VARCHAR(255) NOT NULL,
         active BOOLEAN DEFAULT true
         );
       `);
-
-    console.log('Finished building tables!');
-  } catch (error) {
-    console.error('Error building tables.');
-    throw error;
-  }
-}
-
-async function createPostTable() {
-  try {
-    console.log('Trying to create another table...');
 
     await client.query(`
       CREATE TABLE posts (
@@ -60,9 +51,24 @@ async function createPostTable() {
         active BOOLEAN DEFAULT true
         );
       `);
-    console.log('Finished building new table!');
+
+    await client.query(`
+        CREATE TABLE tags (
+          id SERIAL PRIMARY KEY,
+          name VARCHAR(255) UNIQUE NOT NULL
+        );
+      `);
+
+    await client.query(`
+          CREATE TABLE post_tags (
+            "postId" INTEGER REFERENCES posts(id),
+            "tagId" INTEGER REFERENCES tags(id)
+          );
+      `);
+
+    console.log('Finished creating tables!');
   } catch (error) {
-    console.error('Error building table.');
+    console.error('Error creating tables.');
     throw error;
   }
 }
@@ -103,6 +109,7 @@ async function createInitialPosts() {
   try {
     const [albert, Sandra, glamgal] = await getAllUsers();
 
+    console.log('Starting to create user posts...');
     await createPost({
       authorId: albert.id,
       title: 'First Post',
@@ -120,7 +127,10 @@ async function createInitialPosts() {
       title: 'Cat Post',
       content: 'IM CAT HOW CAN I MROW HELP IT HURTS',
     });
+
+    console.log("Finished creating users' posts!");
   } catch (error) {
+    console.error('Error creating these posts.');
     throw error;
   }
 }
@@ -131,11 +141,10 @@ async function rebuildDB() {
 
     await dropTables();
     await createTables();
-    await createPostTable();
     await createInitialUsers();
     await createInitialPosts();
-    
   } catch (error) {
+    console.error('Error trying to rebuild DB.');
     throw error;
   }
 }
