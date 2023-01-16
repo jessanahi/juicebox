@@ -1,4 +1,13 @@
-const { client, getAllUsers, createUser, updateUser } = require('./index');
+const {
+  client,
+  getAllUsers,
+  createUser,
+  updateUser,
+  createPost,
+  getAllPosts,
+  updatePost,
+  getUserById,
+} = require('./index');
 
 async function createPostTable() {
   try {
@@ -90,6 +99,32 @@ async function createInitialUsers() {
   }
 }
 
+async function createInitialPosts() {
+  try {
+    const [albert, sandra, glamgal] = await getAllUsers();
+
+    await createPost({
+      authorId: albert.id,
+      title: 'First Post',
+      content: 'WHAT IS HAPPENING????',
+    });
+
+    await createPost({
+      authorId: sandra,
+      title: 'Ghost Post',
+      content: 'SERIOUSLLY WAT IS HAPPENING WHY ARE WE ALIVE',
+    });
+
+    await createPost({
+      authorId: glamgal,
+      title: 'Cat Post',
+      content: 'IM CAT HOW CAN I MROW HELP IT HURTS',
+    });
+  } catch (error) {
+    throw error;
+  }
+}
+
 async function rebuildDB() {
   try {
     client.connect();
@@ -97,6 +132,7 @@ async function rebuildDB() {
     await dropTables();
     await createTables();
     await createInitialUsers();
+    await createInitialPosts();
     await createPostTable();
   } catch (error) {
     throw error;
@@ -105,7 +141,7 @@ async function rebuildDB() {
 
 async function testDB() {
   try {
-    console.log('Starting to test database...');
+    console.log('BEEPBEEP Starting to test database...');
 
     const users = await getAllUsers();
     console.log('getAllUsers:', users);
@@ -116,7 +152,19 @@ async function testDB() {
     });
     console.log('Result:', updateUserResult);
 
-    console.log('Finished database tests!');
+    const posts = await getAllPosts();
+    console.log('Result:', posts);
+
+    const updatePostResult = await updatePost(post[0].id, {
+      title: 'New New Post Post',
+      content: "Mew mew kissy cutie 2 is neither kissy nor cutie,, its TrASh,,, 0 stars"
+    });
+    console.log('Result:', updatePostResult);
+
+    const albert = await getUserById(1);
+    console.log('Result:', albert);
+
+    console.log('BEEPBEEP Finished database tests!');
   } catch (error) {
     console.error('Error testing database.');
     throw error;
