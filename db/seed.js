@@ -9,26 +9,6 @@ const {
   getUserById,
 } = require('./index');
 
-async function createPostTable() {
-  try {
-    console.log('Trying to create another table...');
-
-    await client.query(`
-      CREATE TABLE posts (
-        id SERIAL PRIMARY KEY,
-        "authorId" INTEGER REFERENCES users(id) NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        content TEXT NOT NULL,
-        active BOOLEAN DEFAULT true
-        );
-      `);
-    console.log('Finished building new table!');
-  } catch (error) {
-    console.error('Error building table.');
-    throw error;
-  }
-}
-
 async function dropTables() {
   try {
     console.log('Starting to drop tables...');
@@ -67,6 +47,26 @@ async function createTables() {
   }
 }
 
+async function createPostTable() {
+  try {
+    console.log('Trying to create another table...');
+
+    await client.query(`
+      CREATE TABLE posts (
+        id SERIAL PRIMARY KEY,
+        "authorId" INTEGER REFERENCES users(id) NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        active BOOLEAN DEFAULT true
+        );
+      `);
+    console.log('Finished building new table!');
+  } catch (error) {
+    console.error('Error building table.');
+    throw error;
+  }
+}
+
 async function createInitialUsers() {
   try {
     console.log('Starting to create users...');
@@ -101,7 +101,7 @@ async function createInitialUsers() {
 
 async function createInitialPosts() {
   try {
-    const [albert, sandra, glamgal] = await getAllUsers();
+    const [albert, Sandra, glamgal] = await getAllUsers();
 
     await createPost({
       authorId: albert.id,
@@ -110,13 +110,13 @@ async function createInitialPosts() {
     });
 
     await createPost({
-      authorId: sandra,
+      authorId: Sandra.id,
       title: 'Ghost Post',
       content: 'SERIOUSLLY WAT IS HAPPENING WHY ARE WE ALIVE',
     });
 
     await createPost({
-      authorId: glamgal,
+      authorId: glamgal.id,
       title: 'Cat Post',
       content: 'IM CAT HOW CAN I MROW HELP IT HURTS',
     });
@@ -131,9 +131,10 @@ async function rebuildDB() {
 
     await dropTables();
     await createTables();
+    await createPostTable();
     await createInitialUsers();
     await createInitialPosts();
-    await createPostTable();
+    
   } catch (error) {
     throw error;
   }
@@ -155,9 +156,10 @@ async function testDB() {
     const posts = await getAllPosts();
     console.log('Result:', posts);
 
-    const updatePostResult = await updatePost(post[0].id, {
+    const updatePostResult = await updatePost(posts[0].id, {
       title: 'New New Post Post',
-      content: "Mew mew kissy cutie 2 is neither kissy nor cutie,, its TrASh,,, 0 stars"
+      content:
+        'Mew mew kissy cutie 2 is neither kissy nor cutie,, its TrASh,,, 0 stars',
     });
     console.log('Result:', updatePostResult);
 

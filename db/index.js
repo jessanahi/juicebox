@@ -62,7 +62,7 @@ async function createPost({ authorId, title, content }) {
       rows: [post],
     } = await client.query(
       `
-            INSERT INTO post (authorId, title, content)
+            INSERT INTO posts("authorId", title, content)
             VALUES ($1, $2, $3)
             RETURNING *;
         `,
@@ -153,5 +153,5 @@ module.exports = {
   updatePost,
   getAllPosts,
   getPostsByUser,
-  getUserById
+  getUserById,
 };
